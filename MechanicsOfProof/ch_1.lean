@@ -132,4 +132,101 @@ example {x y: ℤ} (hx: x + 3<=2) (hy: y + 2 * x >= 3) : y > 3 :=
     _ > 3 := by norm_num -- textbook uses custom tactic "numbers"
 
 -- 1.4.2
-example
+example {s r : ℚ} (hs: s + 3 >= r) (hr: s + r <= 3) : r <= 3 :=
+  calc
+    r
+    _ <= (2 * r + s - s) / 2 := by norm_num
+    _ <= (r - s + s + r) / 2 := by norm_num
+    _ <= ((s + r) - s + r) / 2 := by norm_num
+    _ <= ((3) - s + r) / 2 := by rel [hr]
+    _ <= (3 - s + (s + 3)) / 2 := by rel [hs]
+    _ = (3 + 3 - s + s) / 2 := by ring
+    _ = (6 + s - s) / 2 := by ring
+    _ = 6 / 2 := by ring
+    _ <= 3 := by norm_num
+
+-- 1.4.3
+example {x y : ℤ} (hy: y <= x + 5) (hx: x <= -2) : x + y < 2 :=
+  calc
+    x + y
+    _ = x + y := by ring
+    _ <= x + (x+5) := by rel [hy]
+    _ <= (-2) + ((-2) + 5) := by rel [hx]
+    _ < 2 := by norm_num
+
+-- 1.4.4
+example {u v x y A B : ℝ}
+  (hA2: A <= 1) (hB: B >= 1)
+  (hx: x <= B) (hy: y <= B)
+  (hu1: 0 <= u) (hu2: u < A) (hv1: 0 <= v) (hv2: v < A) :
+  (u*y) + (v*x) + (u*v) < 3*A*B :=
+  calc
+    (u*y) + (v*x) + (u*v)
+    _ = (u*y) + (v*x) + (u*v) := by ring
+    _ <= (u*B) + (v*B) + (u*v) := by rel [hy, hx]
+    _ <= (A*B) + (A*B) + (A*v) := by rel [hu2, hv2]
+    _ <= (A*B) + (A*B) + (1*v) := by rel [hA2]
+    _ <= (A*B) + (A*B) + (B*v) := by rel [hB]
+    _ < (A*B) + (A*B) + (B*A) := by rel [hv2]
+    _ = 3 * A*B  := by ring
+
+-- 1.4.5
+example {t : ℝ} (ht: t >= 10) : t^2 - 3*t + 17 >= 5 :=
+  calc
+    t^2 - 3*t + 17
+    -- direct substitution of t -> 10, 87, doesn't get to >= 5 in proof by calc, counter-intuitively
+    --_ = (10)^2 - 3*(10) + 17 := by norm_num
+    _ = t * t - 3 * t + 17 := by ring
+    _ >= 10*t - 3*t + 17 := by rel [ht]
+    _ = 7*t + 17 := by ring
+    _ >= 7*(10) + 17 := by rel [ht]
+    _ >= 5 := by norm_num
+
+-- 1.4.6
+example {n : ℤ} (hn: n >= 5) : n^2 > 2*n + 11 :=
+  calc
+    n^2
+    _ = n*n := by ring
+    -- Like 1.4.5, direct sub of n^2 to (5)^2 won't work
+    _ >= 5*n := by rel [hn]
+    _ = 2*n + 3*n := by ring
+    _ >= 2*n + 3*(5) := by rel [hn]
+    _ = 2*n + 15 := by ring
+    _ > 2*n + 11 := by norm_num
+
+-- 1.4.7
+example {m n : ℤ} (h1: m^2 + n <= 2) : n <= 2 :=
+  calc
+    n
+    _ = n := by ring
+    _ <= m^2 + n := by nlinarith -- allows for given that squares are necessarily positive
+    _ <= 2 := by rel [h1]
+
+-- 1.4.8
+example {x y : ℝ} (h1: x^2 + y^2 <= 1) : (x+y)^2 < 3 :=
+  calc
+    (x+y)^2
+    _ <= (x+y)^2 + (x-y)^2 := by nlinarith -- adding the (x-y)^2 must be a non-negative
+    _ = x^2 + 2*x*y + y^2 + x^2 -2*x*y + y^2 := by ring
+    _ = x^2 + x^2 + y^2 + y^2 + 2*x*y - 2*x*y := by ring
+    _ = x^2 + x^2 + y^2 + y^2 := by ring
+    _ = 2*(x^2) + 2*(y^2) := by ring
+    _ = 2*(x^2 + y^2) := by ring
+    _ <= 2*(1) := by rel [h1]
+    _ < 3 := by norm_num
+
+-- 1.4.9
+example {a b : ℚ} (ha: a > 0) (hb: b > 0) (h1: a+b <= 8) : 3*a*b + a <= 7*b+72 :=
+  calc
+    3*a*b + a
+    _ <=  (3*a*b + a) + 2*b^2 + a^2 := by nlinarith -- I did not come up with 2*b^2+a^2, it's sharp
+    _ =  3*a*b + 2*b*b + a*a + a := by ring
+    _ =  2*a*b + a*b + 2*b*b + a*a + a := by ring
+    _ =  2*a*b + 2*b*b + a*a + a*b + a := by ring
+    _ =  2*b*(a+b) + a*(a+b) + a := by ring
+    _ <=  2*b*(8) + a*(8) + a := by rel [h1]
+    _ =  16*b + 9*a := by ring
+    _ =  7*b + 9*b + 9*a := by ring
+    _ =  7*b + 9*(a+b) := by ring
+    _ <=  7*b + 9*(8) := by rel [h1]
+    _ <= 7*b+72 := by norm_num
