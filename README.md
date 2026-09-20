@@ -1,4 +1,6 @@
-# mechanics_of_proof
+# Mechanics of Proof
+
+![](./images/lean_logo.png)
 
 Completed examples from textbook [Mechanics of Proof](https://hrmacbeth.github.io/math2001/index.html)[^1]
 
